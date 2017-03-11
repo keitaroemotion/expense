@@ -109,10 +109,8 @@ def assign(sheet_ranges, k, v):
         sheet_ranges[k] = v
 
 def add_image(ws):
-    img = Image(ROOT + '/image.png')
-    ws.add_image(img, "E2")
-    img2 = Image(ROOT + '/image2.png')
-    ws.add_image(img2, "A1")
+    ws.add_image(Image(ROOT + '/image.png'), "E2")
+    ws.add_image(Image(ROOT + '/image2.png'), "A1")
 
 
 def write(input_data, file_name):
