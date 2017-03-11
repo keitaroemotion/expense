@@ -112,7 +112,6 @@ def add_image(ws):
     ws.add_image(Image(ROOT + '/image.png'), "E2")
     ws.add_image(Image(ROOT + '/image2.png'), "A1")
 
-
 def write(input_data, file_name):
     wb = load_workbook(file_name)
     sheet_ranges = wb[u('経費精算書')]
@@ -127,7 +126,6 @@ def write(input_data, file_name):
     drawline(sheet_ranges)            
     wb.guess_types = True
     wb.save(filename = file_name)
-
 
 file_name = "経費申請書sugano.xlsx"
 # system("rm {0}".format(file_name))
