@@ -96,7 +96,6 @@ def drawline(sheet_ranges):
     sheet_ranges.cell(row = last + 1, column = 3).border = line
     sheet_ranges.cell(row = last + 1, column = 4).border = line
 
-
 def assign(sheet_ranges, k, v):
     if k.startswith("A"):
         v = v.split(" ")
