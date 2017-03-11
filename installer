@@ -1,0 +1,5 @@
+cp expense /usr/local/bin
+mkdir -p /usr/local/etc/expense
+cp out/* /usr/local/etc/expense
+cp info /usr/local/etc/expense
+

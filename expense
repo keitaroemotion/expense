@@ -1,0 +1,148 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+import sys
+from openpyxl.drawing.image import Image
+from openpyxl import load_workbook
+from openpyxl.styles.borders import Border, Side
+from subprocess import call
+from calendar import monthrange
+from datetime import date
+import datetime
+
+ROOT = "/usr/local/etc/expense"
+
+def puts(t):
+  print unicode(t)
+  return t
+
+def system(cmd):
+    call(cmd.split(" "))
+
+def is_default_record(line):
+    return line.startswith("default_record:")
+
+def is_valid_line(line):
+    return not (
+        line.startswith("--") or
+        line == "" or
+        is_default_record(line)
+    )
+
+def read_info():
+    return open(ROOT + "/info", "r").read().split("\n")
+
+def fit(month):
+    return month
+    return len(month) == 1 and "0" + month or month
+
+def first(l):
+    return l[0]
+
+def contains(x, l):
+    return fit(str(x)) in l
+
+def attended_dates(info):
+    days = [fit(x) for x in info if is_valid_line(x)]
+    month = int(fit(
+       first(filter(
+            lambda x: x.startswith("remote "),
+            days
+        )).replace("remote ", "")))
+    dim =  range(1, monthrange(date.today().year, month)[1] + 1)
+    days = [fit(str(d)) for d in dim if not contains(d, days)]
+    return map(
+        lambda x: "2017 {0} {1}".format(fit(str(month)), x),
+        filter(lambda x: not x.startswith("remote "), days)
+    )
+
+def u(x):
+    return unicode(x, "utf-8")
+
+def attended_records():
+    info = read_info()
+    defs = map(lambda y: u(y), [
+        x for x
+        in info
+        if is_default_record(x)
+    ])[0].split(" ")
+
+    return map(
+        lambda x: [x, defs[1], defs[2], defs[3], defs[4]],
+        attended_dates(info)
+    )        
+
+def locations():
+    return map(
+        lambda y: ["{0}{1}".format(x, y) for x in ["A", "B", "C", "D", "E"]],
+        range(6, 30)
+    )
+
+def disp(input_data):
+    for x in input_data:
+        print x
+
+def is_unicode(string):
+    try:
+        string.decode('utf-8')
+        print "string is UTF-8, length %d bytes" % len(string)
+    except UnicodeError:
+        print "string is not UTF-8"
+
+def drawline(sheet_ranges):
+    line = Border(left=Side(style='thin'), 
+           right=Side(style='thin'), 
+           top=Side(style='thin'), 
+           bottom=Side(style='thin'))
+    last = 24       
+    for x in range(6, last):
+        sheet_ranges.cell(row=x, column = 5).border = line
+        sheet_ranges.cell(row=x, column = 6).border = line
+    sheet_ranges.cell(row = last + 1, column = 3).border = line
+    sheet_ranges.cell(row = last + 1, column = 4).border = line
+
+
+def assign(sheet_ranges, k, v):
+    if k.startswith("A"):
+        v = v.split(" ")
+        sheet_ranges[k] = datetime.datetime(int(v[0]), int(v[1]), int(v[2]))
+        sheet_ranges[k].number_format = "m/d/yy"
+    elif k.startswith("D"):    
+        sheet_ranges[k] = int(v)
+        sheet_ranges[k].number_format = unicode('"¥"#,##0_-', "utf-8")
+    else:    
+        sheet_ranges[k] = v
+
+def add_image(ws):
+    img = Image(ROOT + '/image.png')
+    ws.add_image(img, "E2")
+    img2 = Image(ROOT + '/image2.png')
+    ws.add_image(img2, "A1")
+
+
+def write(input_data, file_name):
+    wb = load_workbook(file_name)
+    sheet_ranges = wb[u('経費精算書')]
+
+    assign(sheet_ranges, "E3", datetime.datetime.today())
+    sheet_ranges["E3"].number_format = "m/d/yy"
+
+    for line in input_data:
+        for loc_field in line:
+            assign(sheet_ranges, loc_field[0], loc_field[1])
+    add_image(sheet_ranges)
+    drawline(sheet_ranges)            
+    wb.guess_types = True
+    wb.save(filename = file_name)
+
+
+file_name = "経費申請書sugano.xlsx"
+# system("rm {0}".format(file_name))
+print("cp {0}/template.xlsx {1}".format(ROOT, file_name))
+system("cp {0}/template.xlsx {1}".format(ROOT, file_name))
+
+write(
+    [zip(x[0], x[1]) for x in  zip(locations(), attended_records())],
+    unicode(file_name, "utf-8")
+)
+
+system("open {0}".format(file_name))
