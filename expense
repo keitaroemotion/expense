@@ -31,27 +31,23 @@ def is_valid_line(line):
 def read_info():
     return open(ROOT + "/info", "r").read().split("\n")
 
-def fit(month):
-    return month
-    return len(month) == 1 and "0" + month or month
-
 def first(l):
     return l[0]
 
 def contains(x, l):
-    return fit(str(x)) in l
+    return str(x) in l
 
 def attended_dates(info):
-    days = [fit(x) for x in info if is_valid_line(x)]
-    month = int(fit(
+    days = [x for x in info if is_valid_line(x)]
+    month = int(
        first(filter(
             lambda x: x.startswith("remote "),
             days
-        )).replace("remote ", "")))
+        )).replace("remote ", ""))
     dim =  range(1, monthrange(date.today().year, month)[1] + 1)
-    days = [fit(str(d)) for d in dim if not contains(d, days)]
+    days = [str(d) for d in dim if not contains(d, days)]
     return map(
-        lambda x: "2017 {0} {1}".format(fit(str(month)), x),
+        lambda x: "2017 {0} {1}".format(str(month), x),
         filter(lambda x: not x.startswith("remote "), days)
     )
 
