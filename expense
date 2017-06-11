@@ -126,14 +126,24 @@ def write(input_data, file_name):
     wb.guess_types = True
     wb.save(filename = file_name)
 
-file_name = "経費申請書sugano.xlsx"
-# system("rm {0}".format(file_name))
-print("cp {0}/template.xlsx {1}".format(ROOT, file_name))
-system("cp {0}/template.xlsx {1}".format(ROOT, file_name))
+option = ""
+if len(sys.argv) > 1:
+  option = sys.argv[1]
 
-write(
-    [zip(x[0], x[1]) for x in  zip(locations(), attended_records())],
-    unicode(file_name, "utf-8")
-)
-
-system("open {0}".format(file_name))
+if option == "-h" or option == "--help":
+    print
+    print "expense    ... gen expense file"
+    print "expense -e ... edit expense info" 
+    print
+elif option == "-e":
+    system("vim "+ ROOT + "/info")
+else:  
+    file_name = "経費申請書sugano.xlsx"
+    # system("rm {0}".format(file_name))
+    print("cp {0}/template.xlsx {1}".format(ROOT, file_name))
+    system("cp {0}/template.xlsx {1}".format(ROOT, file_name))
+    write(
+        [zip(x[0], x[1]) for x in  zip(locations(), attended_records())],
+        unicode(file_name, "utf-8")
+    )
+    system("open {0}".format(file_name))
