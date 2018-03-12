@@ -44,6 +44,7 @@ def attended_dates(info):
             lambda x: x.startswith("remote "),
             days
         )).replace("remote ", ""))
+    month = 5    
     dim =  range(1, monthrange(date.today().year, month)[1] + 1)
     days = [str(d) for d in dim if not contains(d, days)]
     return map(
